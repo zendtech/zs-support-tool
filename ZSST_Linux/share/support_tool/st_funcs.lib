@@ -1,0 +1,51 @@
+
+function logerror
+{
+	if [ $? -ne 0 ];then 
+		echo "$ZSST_PLUGIN_NAME: $1 executed, return code was not 0." >> ${ZEND_ERROR_LOG}
+	fi
+}
+
+
+# downloadtofile "URL" "outpit file"
+function downloadtofile
+{
+
+if which wget > /dev/null 2>&1 ;then
+	wget -O $2 $1 2>/dev/null
+	logerror "wget $1"
+
+elif which aria2c > /dev/null 2>&1 ;then
+	aria2c -j 1 -s 1 -o $2 $1 > /dev/null
+	logerror "aria2c $1"
+
+elif which curl > /dev/null 2>&1 ;then
+	curl -sLo $2 $1
+	logerror "curl $1"
+
+else
+	echo "wget, aria2c or curl not found." >> ${ZEND_ERROR_LOG}
+
+fi
+}
+
+
+# yesnocommand "Prompt Message" "Cancel Message" "command"
+function yesnocommand
+{
+	confirm="No"
+	echo -e "$1 [Y/n] : \c"
+
+	read confirm
+	NOMSG="$2"
+	case $(echo $confirm | cut -c1) in
+		("y") echo "  Proceeding...";;
+		("Y") echo "  Proceeding...";;
+		("") echo "  Proceeding...";;
+		("n") echo "  $NOMSG" ; echo "  Exiting..." ; exit;;
+		("N") echo "  $NOMSG" ; echo "  Exiting..." ; exit;;
+		(*) echo "  Your input was not recognised. $NOMSG" ; echo "  Exiting..." ; exit
+	esac
+
+	$3
+}

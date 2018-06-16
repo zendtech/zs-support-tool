@@ -1,0 +1,13 @@
+
+dbtype=$(grep -E '^\s*zend.database.type' $ZCE_PREFIX/etc/zend_database.ini | sed 's@ @@g' | cut -d '=' -f 2)
+
+if [ "$dbtype" == "MYSQL" ]; then
+	dbhost=$(grep -E '^\s*zend.database.host_name' $ZCE_PREFIX/etc/zend_database.ini | sed 's@ @@g' | cut -d '=' -f 2)
+	dbport=$(grep -E '^\s*zend.database.port' $ZCE_PREFIX/etc/zend_database.ini | sed 's@ @@g' | cut -d '=' -f 2)
+	dbname=$(grep -E '^\s*zend.database.name' $ZCE_PREFIX/etc/zend_database.ini | sed 's@ @@g' | cut -d '=' -f 2)
+	dbuser=$(grep -E '^\s*zend.database.user' $ZCE_PREFIX/etc/zend_database.ini | sed 's@ @@g' | cut -d '=' -f 2)
+	dbpw=$(grep -E '^\s*zend.database.password' $ZCE_PREFIX/etc/zend_database.ini | sed 's@ @@g' | cut -d '=' -f 2  | sed 's@^"@@' | sed 's@"$@@')
+
+	MYSQL_EXEC="mysql -h$dbhost -P$dbport -u$dbuser -p$dbpw $dbname -e"
+	MYSQL_PHP="$ZCE_PREFIX/bin/php -nd extension='$ZCE_PREFIX/lib/php_extensions/mysqli.so' -f $ZCE_PREFIX/share/support_tool/mysql.php $dbhost $dbport $dbname $dbuser $dbpw"
+fi

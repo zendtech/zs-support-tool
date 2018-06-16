@@ -1,0 +1,15 @@
+ [options]
+
+Supported Options:
+
+  --help         Print this help message and exit.
+  
+  -m, --message     Add custom message to the support tool archive.
+
+  --full         Collect full logs, fetch all files from the logs directory.
+                 By default the logs are truncated to 1000 last lines and
+                 rotated logs are excluded.
+
+  --get-dbs      Fetch all SQLITE databases.
+
+

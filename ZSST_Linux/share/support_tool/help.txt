@@ -1,0 +1,68 @@
+ [options]
+
+Data Collection Options:
+
+  --help            Print this help message and exit.
+
+  -m, --message     Add custom message to the support tool archive.
+
+  --full            Collect full logs, fetch all files from the logs directory.
+                    By default the logs are truncated to 1000 last lines and
+                    rotated logs are excluded.
+
+  --get-dbs         Fetch all SQLITE databases.
+
+
+
+Maintenance Options:
+
+  --chuser          Change web server user and group in Zend Server configuration
+                    and file ownership. Usage:
+
+                    ./support_tool.sh --chuser olduser:oldgroup newuser:newgroup
+
+                    The command expects verbal user and group names, not IDs
+
+  --clean-monitor   Works only with stand-alone Zend Server (SQLITE).
+                    Cleans all Monitoring events and Code Tracing dumps by
+                    deleting the corresponding database and dump files.
+                    WARNING: Zend Server is restarted in the process.
+
+  --clean-alerts    Cleans all notifications that appear in Zend Server UI.
+                    This helps in case of 'stuck' notifications - the alert
+                    condition is gone or has been fixed, but the notifications
+                    still exist in the databse.
+
+  --core-dump       Enable saving core dumps of crashing Apache processes.
+                    The procedure includes installation of debug symbols of
+                    PHP and Zend's components and daemons, adding a directive
+                    in Apache configuration and Zend Server restart.
+                    You can add the '--auto' parameter to install debug symbols
+                    without confirmation prompt from the package manager.
+                    It is also possible to define a specific release directory,
+                    for example '7.0.0_update3', i.e. install from
+                    http://repos.zend.com/zend-server/7.0.0_update3/
+                    Example:
+
+                    ./support_tool.sh --core-dump [--auto] [specific release directory]
+
+                    To revert the configuration changes (stop creating
+                    core dumps), add the '--off' parameter:
+
+                    ./support_tool.sh --core-dump --off
+
+  --simple-auth     Disable Extended Authentication. Optional parameters:
+                    WebAPI key name
+                    WebAPI key hash
+
+                    ./support_tool.sh --simple-auth [apiName apiHash]
+
+  --zray-off        Completely disable Z-Ray and URL Insight
+                    (i.e. the Statistics PHP extension).
+                    Add '--revert' to re-enable the extension.
+
+  --update          Support Tool update. Optionally accepts one of these keys:
+                      --check     Only print current and latest build numbers
+                      --auto      Update Support Tool without confirmation prompt
+
+                    ./support_tool.sh --update [--check | --auto]

@@ -1,0 +1,9 @@
+
+
+
+Zend Server (IBM i) Support Tool App
+
+NOTE
+
+We don't recommend installing this application into the root of any Virtual Host.
+I.e. you should always specify a sub-directory during deployment ('Path' field in the previous screen).
