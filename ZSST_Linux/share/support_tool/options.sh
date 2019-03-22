@@ -5,7 +5,7 @@ zsstusage()
 	cat $ZCE_PREFIX/share/support_tool/help.txt
 }
 
-export ZSST_ver="PRODUCT_VERSION (Laura) build ST_BUILD"
+export ZSST_ver="PRODUCT_VERSION (Eight) build ST_BUILD"
 
 for option in "$@"; do
 	case "$option" in

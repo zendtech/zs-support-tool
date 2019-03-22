@@ -11,15 +11,15 @@ function logerror
 function downloadtofile
 {
 
-if which wget > /dev/null 2>&1 ;then
+if command -v wget > /dev/null 2>&1 ;then
 	wget -O $2 $1 2>/dev/null
 	logerror "wget $1"
 
-elif which aria2c > /dev/null 2>&1 ;then
+elif command -v aria2c > /dev/null 2>&1 ;then
 	aria2c -j 1 -s 1 -o $2 $1 > /dev/null
 	logerror "aria2c $1"
 
-elif which curl > /dev/null 2>&1 ;then
+elif command -v curl > /dev/null 2>&1 ;then
 	curl -sLo $2 $1
 	logerror "curl $1"
 

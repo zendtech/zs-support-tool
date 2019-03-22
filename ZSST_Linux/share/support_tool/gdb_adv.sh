@@ -29,19 +29,10 @@ if [ ! -w /etc/passwd ]; then
 	exit 1
 fi
 
-cd /usr/local/zend/var/core
-
-#wget "https://raw.githubusercontent.com/php/php-src/master/.gdbinit" 2>/dev/null
-
-#cat > .gdbcommands <<EOC
-#backtrace
-#backtrace full
-#source .gdbinit
-#zbacktrace
-#EOC
+cd /usr/local/zend/var/core || exit 1
 
 if [ $# -gt 0 ]; then
-	for dump in $@; do
+	for dump in "$@"; do
 		if [ -f $dump ]; then
 			echo "Processing  $dump ..."
 			binary=$(readelf -n $dump | grep -E "^\s+/" | head -1 | tr -d '[:space:]')

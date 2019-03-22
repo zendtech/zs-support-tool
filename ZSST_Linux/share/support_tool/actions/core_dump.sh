@@ -22,7 +22,7 @@ elif [ "$2" = "--off" ]; then
 	elif [ "$WEB_SRV" = "nginx" ]; then
 		rm -f /lib/systemd/system/nginx.service.d/zend-core-dump.conf > /dev/null 2>&1
 	fi
-	if which systemctl 2> /dev/null; then
+	if systemctl list-units foo.bar.dummy > /dev/null  2>&1; then
 		systemctl daemon-reload
 	fi
 	ocp=$(head -1 $ZCE_PREFIX/var/backups/original_core_pattern)
@@ -69,32 +69,6 @@ function otherrepo
 	revert="otherrepo $1 revertBAK"
 }
 
-
-mkdir $ZCE_PREFIX/var/core
-chmod 777 $ZCE_PREFIX/var/core
-
-PHP_VER=`$ZCE_PREFIX/bin/php -nr "echo PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;"`
-
-downloadtofile "https://raw.githubusercontent.com/php/php-src/PHP-$PHP_VER/.gdbinit" "$ZCE_PREFIX/var/core/.gdbinit"
-cat > $ZCE_PREFIX/var/core/.gdbcommands <<EOC
-backtrace
-backtrace full
-source .gdbinit
-zbacktrace
-EOC
-
-cp $ZCE_PREFIX/share/support_tool/gdb_adv.sh $ZCE_PREFIX/var/core
-chmod a+x $ZCE_PREFIX/var/core/gdb_adv.sh
-
-
-#if [[ "$PHP_VER" > "5.4" ]]; then
-#	DBG_LOADER=""
-#else
-#	DBG_LOADER="php-$PHP_VER-loader-zend-server-dbg"
-#fi
-
-DBG_COMMON="zend-server-php-$PHP_VER-dbg gdb"
-
 function set_core_dump_confs {
 	if [ "$WEB_SRV" = "apache" ]; then
 		if [ "$1" = "apache2" ]; then
@@ -104,42 +78,69 @@ function set_core_dump_confs {
 				apacheConf="conf-enabled"
 			fi
 		else
+			# $1 == httpd
 			apacheConf="conf.d"
 		fi
 		echo "CoreDumpDirectory $ZCE_PREFIX/var/core" > /etc/$1/$apacheConf/zend_coredump.conf
 	fi
-	if which systemctl 2> /dev/null; then
+	if systemctl list-units foo.bar.dummy > /dev/null  2>&1; then
 		mkdir -p /lib/systemd/system/$1.service.d/
 		echo -e "[Service]\nLimitCORE=infinity" > /lib/systemd/system/$1.service.d/zend-core-dump.conf
 		systemctl daemon-reload
 	fi
 }
 
-if which apt-get 2> /dev/null; then
+
+mkdir $ZCE_PREFIX/var/core
+chmod 777 $ZCE_PREFIX/var/core
+
+PHP_VER=`$ZCE_PREFIX/bin/php -nr "echo PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;"`
+
+downloadtofile "https://raw.githubusercontent.com/php/php-src/PHP-$PHP_VER/.gdbinit" "$ZCE_PREFIX/var/core/.gdbinit_php"
+cat > $ZCE_PREFIX/var/core/.gdbcommands <<EOC
+backtrace
+backtrace full
+source .gdbinit_php
+zbacktrace
+EOC
+
+cp $ZCE_PREFIX/share/support_tool/gdb_adv.sh $ZCE_PREFIX/var/core
+chmod a+x $ZCE_PREFIX/var/core/gdb_adv.sh
+
+# not including 'php-$PHP_VER-fcgi-zend-server-dbg' because it seems to cause bogus conflict in YUM
+DBG_COMMON="gdb zend-server-php-$PHP_VER-dbg php-$PHP_VER-bin-zend-server-dbg"
+
+if command -v apt-get 2> /dev/null; then
 	REPOFILE="/etc/apt/sources.list.d/zend.list"
 	otherrepo $REPOFILE $RELEASE
 	DBG_PHP_BIN="php-$PHP_VER-fpm-zend-server-dbg"
 	if [ "$WEB_SRV" = "apache" ]; then
+		SAPI=$(grep -E '^\s*zend.php_sapi\s*=' $ZCE_PREFIX/etc/conf.d/ZendGlobalDirectives.ini | sed 's@ @@g' | cut -d '=' -f 2)
 		set_core_dump_confs apache2
-		DBG_PHP_BIN="libapache2-mod-php-$PHP_VER-zend-server-dbg php-$PHP_VER-bin-zend-server-dbg"
+		if [ "$SAPI" != "fpm" ]; then
+			DBG_PHP_BIN="libapache2-mod-php-$PHP_VER-zend-server-dbg"
+		fi
 	elif [ "$WEB_SRV" = "nginx" ]; then
 		set_core_dump_confs nginx
 	fi
 	apt-get update
-	apt-get $AUTOMATIC install $DBG_COMMON $DBG_PHP_BIN $DBG_LOADER
+	apt-get $AUTOMATIC install $DBG_COMMON $DBG_PHP_BIN
 
-elif which yum 2> /dev/null; then
+elif command -v yum 2> /dev/null; then
 	REPOFILE="/etc/yum.repos.d/zend.repo"
 	otherrepo $REPOFILE $RELEASE
 	DBG_PHP_BIN="php-$PHP_VER-fpm-zend-server-dbg"
 	if [ "$WEB_SRV" = "apache" ]; then
+		SAPI=$(grep -E '^\s*zend.php_sapi' $ZCE_PREFIX/etc/conf.d/ZendGlobalDirectives.ini | sed 's@ @@g' | cut -d '=' -f 2)
 		set_core_dump_confs httpd
-		DBG_PHP_BIN="mod-php-$PHP_VER-apache2-zend-server-dbg php-$PHP_VER-bin-zend-server-dbg"
+		if [ "$SAPI" != "fpm" ]; then
+			DBG_PHP_BIN="mod-php-$PHP_VER-apache2-zend-server-dbg"
+		fi
 	elif [ "$WEB_SRV" = "nginx" ]; then
 		set_core_dump_confs nginx
 	fi
 	yum clean all
-	yum $AUTOMATIC install $DBG_COMMON $DBG_PHP_BIN $DBG_LOADER
+	yum $AUTOMATIC install $DBG_COMMON $DBG_PHP_BIN
 
 else
 	echo

@@ -65,7 +65,7 @@ EODEAMONS
 while read command; do
 	$command >> $ZEND_DATA_TMPDIR/zs_$(echo "$command" | cut -d " " -f 1).txt
 done <<EOCMD
-lsof +D $ZCE_PREFIX
+lsof -x +D $ZCE_PREFIX
 du -sh $ZCE_PREFIX/
 du -sh $ZCE_PREFIX/*
 du -sh $ZCE_PREFIX/var/*

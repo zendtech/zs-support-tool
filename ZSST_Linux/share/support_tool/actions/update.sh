@@ -12,20 +12,21 @@ fi
 function installLatest
 {
 	mkdir $ZCE_PREFIX/tmp/STlatest
-	cd $ZCE_PREFIX/tmp/STlatest
+	cd $ZCE_PREFIX/tmp/STlatest || exit 1
 
 	ZEND_ERROR_LOG=/dev/null
-	downloadtofile "http://us-up.zend.com/files/lateST.php?redirect" ZSST_latest.tgz
+	downloadtofile "https://github.com/zendtech/zs-support-tool/releases/latest/download/SupportTool_LinuxSFX.tar.gz" ZSST_latest.tgz
 
 	tar xf ZSST_latest.tgz
 	./SupportToolSFX.bin
 	
-	cd $ZCE_PREFIX/tmp
-	rm -rf STlatest
+	rm -rf "$ZCE_PREFIX/tmp/STlatest"
 }
 
-
-latestBuild=$(curl -s http://us-up.zend.com/files/lateST.php | sed -e "s@SupportToolSFX_@@" -e "s@\.tar\.gz@@" | cut -d'_' -f2)
+cd $ZCE_PREFIX/tmp || exit 1
+downloadtofile "https://api.github.com/repos/zendtech/zs-support-tool/releases/latest" online_ver.json
+latestBuild=$(php -n -r '$a=file_get_contents("online_ver.json"); $b=json_decode($a,true); echo $b["name"];')
+rm -f online_ver.json
 currentBuild=$($ZCE_PREFIX/bin/support_tool.sh -v | sed "s@^.*build @@")
 
 echo

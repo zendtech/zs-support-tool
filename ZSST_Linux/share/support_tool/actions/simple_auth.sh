@@ -21,7 +21,7 @@ elif [ $# -eq 1  ]; then
 
 
 	elif [ "$dbtype" == "MYSQL" ]; then
-		if which mysql > /dev/null 2>&1 ;then
+		if command -v mysql > /dev/null 2>&1 ;then
 			apiHash=$($MYSQL_EXEC 'SELECT HASH FROM GUI_WEBAPI_KEYS WHERE NAME="admin";' -N)
 		else
 			cat <<EOP
