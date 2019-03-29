@@ -65,7 +65,7 @@ if [ "$1" = "prepare" ]; then
 		otherrepo $REPOFILE $RELEASE
 		DBG_PHP_BIN="php-$PHP_VER-fpm-zend-server-dbg"
 		if [ "$WEB_SRV" = "apache" ]; then
-			SAPI=$(grep -E '^\s*zend.php_sapi\s*=' $ZCE_PREFIX/etc/conf.d/ZendGlobalDirectives.ini | sed 's@ @@g' | cut -d '=' -f 2)
+			SAPI=$(grep -E '^\s*zend.php_sapi\s*=' /usr/local/zend/etc/conf.d/ZendGlobalDirectives.ini | sed 's@ @@g' | cut -d '=' -f 2)
 			if [ "$SAPI" != "fpm" ]; then
 				DBG_PHP_BIN="libapache2-mod-php-$PHP_VER-zend-server-dbg"
 			fi
@@ -78,7 +78,7 @@ if [ "$1" = "prepare" ]; then
 		otherrepo $REPOFILE $RELEASE
 		DBG_PHP_BIN="php-$PHP_VER-fpm-zend-server-dbg"
 		if [ "$WEB_SRV" = "apache" ]; then
-			SAPI=$(grep -E '^\s*zend.php_sapi' $ZCE_PREFIX/etc/conf.d/ZendGlobalDirectives.ini | sed 's@ @@g' | cut -d '=' -f 2)
+			SAPI=$(grep -E '^\s*zend.php_sapi' /usr/local/zend/etc/conf.d/ZendGlobalDirectives.ini | sed 's@ @@g' | cut -d '=' -f 2)
 			if [ "$SAPI" != "fpm" ]; then
 				DBG_PHP_BIN="mod-php-$PHP_VER-apache2-zend-server-dbg"
 			fi
@@ -91,8 +91,8 @@ if [ "$1" = "prepare" ]; then
 		exit 1
 	fi
 
-    downloadtofile "https://raw.githubusercontent.com/php/php-src/PHP-$PHP_VER/.gdbinit" "/usr/local/zend/tmp/.gdbinit_php"
-    cat > /usr/local/zend/tmp/.gdbcommands <<EOC
+	downloadtofile "https://raw.githubusercontent.com/php/php-src/PHP-$PHP_VER/.gdbinit" "/usr/local/zend/tmp/.gdbinit_php"
+	cat > /usr/local/zend/tmp/.gdbcommands <<EOC
 backtrace
 backtrace full
 source .gdbinit_php
@@ -101,7 +101,7 @@ EOC
 
 
 	$revert
-    exit 0
+	exit 0
 fi
 
 if echo "$1" | grep -E '(--)grep=.+' > /dev/null 2>&1; then
@@ -123,10 +123,10 @@ elif echo "$1" | grep -E '(--)lsof=.+' > /dev/null 2>&1; then
 		plist="$(ps -eTo spid,user,command | sed "s/^/ /g" | grep -E "$LList_filter" | grep -E "$filter" | grep -v "$0" | sed "s/^\s*//g" | cut -d' ' -f1)"
 	fi
 else
-    if [ ! "$1" = "" ]; then
+	if [ ! "$1" = "" ]; then
 		echo $1
 		echo $2
-        cat <<HLP
+		cat <<HLP
 
         Usage:
             -  $0
@@ -143,18 +143,18 @@ else
             e.g.: $0 --grep="httpd"
 
 
-			-  $0 --lsof="<arguments>"
-					filter processes by lsof
-			e.g.: $0 --lsof="-x +D /var/www/html/reports"
+            -  $0 --lsof="<arguments>"
+                    filter processes by lsof
+            e.g.: $0 --lsof="-x +D /var/www/html/reports"
 
-			"--grep" and "--lsof" can be combined and will be applied in
-			the order they are specified
-			e.g.: $0 filter 
+            "--grep" and "--lsof" can be combined and will be applied in
+            the order they are specified
+            e.g.: $0 filter 
 
 HLP
-        exit 1
-    fi
-    plist="$(ps -eo pid,user,command | grep -E "[z]end|[a]pache|[h]ttpd" | grep -v "$0" | sed "s/^\s*//" | cut -d' ' -f1)"
+		exit 1
+	fi
+	plist="$(ps -eo pid,user,command | grep -E "[z]end|[a]pache|[h]ttpd" | grep -v "$0" | sed "s/^\s*//" | cut -d' ' -f1)"
 fi
 
 if [ "$plist" = "" ]; then
@@ -186,18 +186,18 @@ for zpid in $plist; do
 	zpidf=$(cat /proc/$zpid/cmdline)
 	zpide=$(cat /proc/$zpid/environ)
 	zpidl=$(cat /proc/$zpid/limits)
-	echo "Gathering information about the process '$zpidc' ($zpid)"
+	# echo "Gathering information about the process '$zpidc' ($zpid)"
 	echo -e "$zpid :: $zpidc\n$zpidf\n\n$zpidl\n\n$zpide\n\n" > $SD/proc_${zpidc}_${zpid}.txt
 	timeout 5s strace -fp $zpid > $SD/strace_${zpidc}_${zpid}.txt 2>&1 &
 done
 
 bg=20
 until [ $bg -lt 1 ]; do
-    sleep 2
-    bg=$(($(jobs | grep Running | grep strace_ | wc -l) + 0 ))
-    if [ $bg -gt 0 ]; then
-        echo "$bg still in strace"
-    fi
+	sleep 2
+	bg=$(($(jobs | grep Running | grep strace_ | wc -l) + 0 ))
+	if [ $bg -gt 0 ]; then
+		echo "$bg still in strace"
+	fi
 done
 
 : <<'DISABLED_DUMP_N_PARSE'
@@ -234,11 +234,11 @@ done
 
 bg=20
 until [ $bg -lt 1 ]; do
-    sleep 5
-    bg=$(($(jobs | grep Running | grep core_traces_ | wc -l) + 0 ))
-    if [ $bg -gt 0 ]; then
-        echo "$bg still in core parse"
-    fi
+	sleep 5
+	bg=$(($(jobs | grep Running | grep core_traces_ | wc -l) + 0 ))
+	if [ $bg -gt 0 ]; then
+		echo "$bg still in core parse"
+	fi
 done
 DISABLED_DUMP_N_PARSE
 
@@ -247,8 +247,38 @@ echo "Starting backtracing"
 cd $SD
 cp /usr/local/zend/tmp/.gdb* .
 for zpid in $plist; do
+	if [ ! -f /proc/$zpid/comm ]; then
+		echo "Process $zpid seems to have finished. Next..."
+		continue
+	fi
 	zpidc=$(cat /proc/$zpid/comm)
+
+	# if there is less than 500MB of free RAM and swap, loop and keep cheking
+	mf=$(cat /proc/meminfo |grep "MemFree:" | awk '{print $2}')
+	sf=$(cat /proc/meminfo |grep "SwapFree:" | awk '{print $2}')
+	begin=$(date +%s)
+	# swap is usually too slow, therefore looking only at RAM
+	# use '$(( $mf + $sf ))' instead of just '$mf' to account for swap, too:
+	until [ $mf -gt 500000 ]; do
+		
+		# trying to prevent endless loop - break after 10 minutes, yet finish the rest
+		paused=$(( $(date +%s) - $begin ))
+		if [ $paused -gt 120 ]; then
+			echo "Giving up at $zpidc ($zpid) after 10 minutes."
+			break 2
+		fi
+		# output pause message only once or twice
+		if [ $paused -lt 3 ]; then
+			echo "Pausing at $zpidc ($zpid) until some memory frees up."
+			echo "Currently - MemFree: $mf, SwapFree: $sf"
+		fi
+		sleep 1
+		mf=$(cat /proc/meminfo |grep "MemFree:" | awk '{print $2}')
+		sf=$(cat /proc/meminfo |grep "SwapFree:" | awk '{print $2}')
+	done
+
 	if echo $zpidc | grep -E "php|apache|^httpd" > /dev/null; then
+		# echo "Backtracing the process '$zpidc' ($zpid)"
 		gdb -n -p $zpid --batch \
 		-ex "set logging redirect on" \
 		-ex "set logging file backtrace_${zpidc}_${zpid}.txt" \
@@ -266,15 +296,29 @@ for zpid in $plist; do
 		-ex "set logging on" \
 		-ex "backtrace full" > /dev/null 2>&1 &
 	fi
+	# give gbd some time to settle in
+	sleep 0.5
 done
 
 bg=20
+begin=$(date +%s)
 until [ $bg -lt 1 ]; do
-    sleep 2
-    bg=$(($(jobs | grep Running | grep backtrace_ | wc -l) + 0 ))
-    if [ $bg -gt 0 ]; then
-        echo "$bg still in backtrace"
-    fi
+	
+	# trying to prevent endless loop - break after 10 minutes
+	paused=$(( $(date +%s) - $begin ))
+	if [ $paused -gt 120 ]; then
+		echo "Waiting for some backtraces to finish for too long (10 minutes)."
+		echo "Will try running 'pkill gdb', but you should check your process list anyway."
+		echo 'There may be "stuck" gdb processes. Run something like "ps aux" as root to check.' > _WARNING_.txt
+		pkill gdb
+		break
+	fi
+
+	sleep 2
+	bg=$(($(jobs | grep Running | grep backtrace_ | wc -l) + 0 ))
+	if [ $bg -gt 0 ]; then
+		echo "$bg still in backtrace"
+	fi
 done
 
 echo
