@@ -4,7 +4,7 @@
     <summary>Deployable Zend Server (IBM i) Support Tool</summary>
     <description>Zend Server Support Tool which can be deployed from a ZPK and run as a web application. Of course, it's still a shell on the inside.</description>
     <version>
-        <release>9.1.180516.200806</release>
+        <release>2018.0._TS_</release>
     </version>
     <icon>ZSST_icon.png</icon>
     <eula>read.txt</eula>
