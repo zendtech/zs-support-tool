@@ -115,7 +115,7 @@ if command -v apt-get 2> /dev/null; then
 	otherrepo $REPOFILE $RELEASE
 	DBG_PHP_BIN="php-$PHP_VER-fpm-zend-server-dbg"
 	if [ "$WEB_SRV" = "apache" ]; then
-		SAPI=$(grep -E '^\s*zend.php_sapi\s*=' $ZCE_PREFIX/etc/conf.d/ZendGlobalDirectives.ini | sed 's@ @@g' | cut -d '=' -f 2)
+		SAPI=$(grep -E '^\s*zend.php_sapi\s*=' $ZCE_PREFIX/etc/ZendGlobalDirectives.ini | sed 's@ @@g' | cut -d '=' -f 2)
 		set_core_dump_confs apache2
 		if [ "$SAPI" != "fpm" ]; then
 			DBG_PHP_BIN="libapache2-mod-php-$PHP_VER-zend-server-dbg"
@@ -131,7 +131,7 @@ elif command -v yum 2> /dev/null; then
 	otherrepo $REPOFILE $RELEASE
 	DBG_PHP_BIN="php-$PHP_VER-fpm-zend-server-dbg"
 	if [ "$WEB_SRV" = "apache" ]; then
-		SAPI=$(grep -E '^\s*zend.php_sapi' $ZCE_PREFIX/etc/conf.d/ZendGlobalDirectives.ini | sed 's@ @@g' | cut -d '=' -f 2)
+		SAPI=$(grep -E '^\s*zend.php_sapi' $ZCE_PREFIX/etc/ZendGlobalDirectives.ini | sed 's@ @@g' | cut -d '=' -f 2)
 		set_core_dump_confs httpd
 		if [ "$SAPI" != "fpm" ]; then
 			DBG_PHP_BIN="mod-php-$PHP_VER-apache2-zend-server-dbg"

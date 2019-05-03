@@ -16,20 +16,6 @@ Data Collection Options:
 
 Maintenance Options:
 
-  --chuser          To be REMOVED in one of the releases during 2019.
-                    Change web server user and group in Zend Server configuration
-                    and file ownership. Usage:
-
-                    ./support_tool.sh --chuser olduser:oldgroup newuser:newgroup
-
-                    The command expects verbal user and group names, not IDs
-
-  --clean-monitor   To be REMOVED in one of the releases during 2019.
-                    Works only with stand-alone Zend Server (SQLITE).
-                    Cleans all Monitoring events and Code Tracing dumps by
-                    deleting the corresponding database and dump files.
-                    WARNING: Zend Server is restarted in the process.
-
   --clean-alerts    Cleans all notifications that appear in Zend Server UI.
                     This helps in case of 'stuck' notifications - the alert
                     condition is gone or has been fixed, but the notifications

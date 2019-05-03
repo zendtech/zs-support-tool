@@ -14,7 +14,7 @@
     <dependencies>
     <required>
       <zendserver>
-        <min>7.0.0</min>
+        <min>2019.0.0</min>
       </zendserver>
     </required>
   </dependencies>

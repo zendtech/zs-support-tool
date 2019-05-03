@@ -12,8 +12,8 @@ echo >> $WRITETO
 $ZCE_PREFIX/bin/php -v >> $WRITETO
 echo >> $WRITETO
 
-OrderNr=$(grep 'zend.user_name' $ZCE_PREFIX/etc/conf.d/ZendGlobalDirectives.ini | cut -d'=' -f2 | tr -d '[:space:]')
-LicenseKey=$(grep 'zend.serial_number' $ZCE_PREFIX/etc/conf.d/ZendGlobalDirectives.ini | cut -d'=' -f2 | tr -d '[:space:]')
+OrderNr=$(grep 'zend.user_name' $ZCE_PREFIX/etc/ZendGlobalDirectives.ini | cut -d'=' -f2 | tr -d '[:space:]')
+LicenseKey=$(grep 'zend.serial_number' $ZCE_PREFIX/etc/ZendGlobalDirectives.ini | cut -d'=' -f2 | tr -d '[:space:]')
 
 cat <<EOST > /tmp/checLic.php
 <?php

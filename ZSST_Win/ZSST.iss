@@ -1,13 +1,13 @@
 
 [Setup]
 SetupIconFile=zsst.ico
-AppName=Zend Server 2018.0 Support Tool
-VersionInfoVersion=2018.0.0.0
-VersionInfoDescription=Zend Server 2018.0 Support Tool (Laura)
-AppVersion=2018.0
+AppName=Zend Server 2019.0 Support Tool
+VersionInfoVersion=2019.0.0.0
+VersionInfoDescription=Zend Server 2019.0 Support Tool (Eight)
+AppVersion=2019.0
 AppPublisher=Rogue Wave Software, Ltd.
 AppPublisherURL=http://support.roguewave.com
-DefaultDirName={tmp}\ZS9ST
+DefaultDirName={tmp}\ZSST
 DisableProgramGroupPage=yes
 Uninstallable=no
 DisableDirPage=yes
@@ -216,6 +216,7 @@ begin
             RegDeleteKeyIncludingSubkeys(HKLM64, 'Software\Microsoft\Windows\Windows Error Reporting\LocalDumps\zsd.exe');
             RegDeleteKeyIncludingSubkeys(HKLM64, 'Software\Microsoft\Windows\Windows Error Reporting\LocalDumps\zdd.exe');
             RegDeleteKeyIncludingSubkeys(HKLM64, 'Software\Microsoft\Windows\Windows Error Reporting\LocalDumps\scd.exe');
+            RegDeleteKeyIncludingSubkeys(HKLM64, 'Software\Microsoft\Windows\Windows Error Reporting\LocalDumps\statsd.exe');
           end;
         end else begin
           if MsgBox('Creating and saving dumps of Zend Server processes does not seem to be configured. Enable saving process dumps in "C:\Dumps"?', mbConfirmation, MB_YESNO) = IDYES then
@@ -250,6 +251,10 @@ begin
             RegWriteExpandStringValue(HKLM64, 'Software\Microsoft\Windows\Windows Error Reporting\LocalDumps\scd.exe', 'DumpFolder', 'C:\Dumps');
             RegWriteDWordValue(HKLM64, 'Software\Microsoft\Windows\Windows Error Reporting\LocalDumps\scd.exe', 'DumpCount', 5);
             RegWriteDWordValue(HKLM64, 'Software\Microsoft\Windows\Windows Error Reporting\LocalDumps\scd.exe', 'DumpType', 2);
+
+            RegWriteExpandStringValue(HKLM64, 'Software\Microsoft\Windows\Windows Error Reporting\LocalDumps\statsd.exe', 'DumpFolder', 'C:\Dumps');
+            RegWriteDWordValue(HKLM64, 'Software\Microsoft\Windows\Windows Error Reporting\LocalDumps\statsd.exe', 'DumpCount', 5);
+            RegWriteDWordValue(HKLM64, 'Software\Microsoft\Windows\Windows Error Reporting\LocalDumps\statsd.exe', 'DumpType', 2);
           end;
         end;
       end;
@@ -271,8 +276,8 @@ begin
       begin
         MsgBox('The password cannot be empty', mbError, MB_OK);
       end else begin
-        Exec (InstallPath + '\ZendServer\bin\php.exe', '"' + InstallPath + '\ZendServer\bin\gui_passwd.php" "' + PasswdPage.Values[0] + '"',
-          InstallPath + '\ZendServer\bin', SW_HIDE, ewWaitUntilTerminated, cmdResult);
+        Exec (InstallPath + '\ZendServer\php\active\bin\php.exe', '"' + InstallPath + '\ZendServer\bin\gui_passwd.php" "' + PasswdPage.Values[0] + '"',
+          InstallPath + '\ZendServer\php\active\bin', SW_HIDE, ewWaitUntilTerminated, cmdResult);
         MsgBox('Password change completed.' + #13#10 + '( exit status: ' + IntToStr(cmdResult) + ' )', mbInformation, MB_OK);
       end;
     end;
@@ -293,9 +298,9 @@ begin
         ProgressPage.SetText('Preparing...', '');
         ProgressPage.SetProgress(1, 10);
 
-        ArchiveName := ArchivePage.Values[0] +  '\ZS9ST_' + ZSVersion + '_' + Timestamp + '.7z';
+        ArchiveName := ArchivePage.Values[0] +  '\ZSST_' + ZSVersion + '_' + Timestamp + '.7z';
         
-        CreateDir (ExpandConstant('{tmp}\ZS9ST_Files'));
+        CreateDir (ExpandConstant('{tmp}\ZSST_Files'));
 
         ExtractTemporaryFiles('{tmp}\*.*');
 
@@ -308,11 +313,11 @@ begin
           '-sLo phpinfo_main.html http://127.0.0.1:10083/zsd_php_info.php',
           ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
         
-        Exec (InstallPath + '\ZendServer\bin\php.exe',
+        Exec (InstallPath + '\ZendServer\php\active\bin\php.exe',
           '-nr "$info=json_decode(file_get_contents(\"phpinfo_main.html\"), true); file_put_contents(\"real_phpinfo_main.html\",$info[\"phpinfo\"]);"',
           ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
 
-        RenameFile (ExpandConstant('{tmp}\real_phpinfo_main.html'), ExpandConstant('{tmp}\ZS9ST_Files\phpinfo.html'));
+        RenameFile (ExpandConstant('{tmp}\real_phpinfo_main.html'), ExpandConstant('{tmp}\ZSST_Files\phpinfo.html'));
         
 
         // CONFIGS AND LOGS
@@ -330,39 +335,52 @@ begin
             ApachePath := InstallPath + '\Apache24';
           end;
           
-          DirCopy (ApachePath +'\conf', ExpandConstant('{tmp}\ZS9ST_Files\apache_config'));
-          DirCopy (ApachePath +'\logs', ExpandConstant('{tmp}\ZS9ST_Files\apache_logs'));  
+          DirCopy (ApachePath +'\conf', ExpandConstant('{tmp}\ZSST_Files\apache_config'));
+          DirCopy (ApachePath +'\logs', ExpandConstant('{tmp}\ZSST_Files\apache_logs'));  
         end else begin
-          //DirCopy (ExpandConstant('{sys}\inetsrv\config'), ExpandConstant('{tmp}\ZS9ST_Files\iis_config'));
-          CreateDir (ExpandConstant('{tmp}\ZS9ST_Files\iis_config'));
-          Exec ('cmd', '/c ' + ExpandConstant('{sys}\inetsrv\appcmd.exe list config /text:*') + ' > "' + ExpandConstant('{tmp}\ZS9ST_Files\iis_config\CONFIG.txt') + '"',
+          //DirCopy (ExpandConstant('{sys}\inetsrv\config'), ExpandConstant('{tmp}\ZSST_Files\iis_config'));
+          CreateDir (ExpandConstant('{tmp}\ZSST_Files\iis_config'));
+          Exec ('cmd', '/c ' + ExpandConstant('{sys}\inetsrv\appcmd.exe list config /text:*') + ' > "' + ExpandConstant('{tmp}\ZSST_Files\iis_config\CONFIG.txt') + '"',
             ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
-          Exec ('cmd', '/c ' + ExpandConstant('{sys}\inetsrv\appcmd.exe list apppool /text:*') + ' > "' + ExpandConstant('{tmp}\ZS9ST_Files\iis_config\APPOOL.txt') + '"',
+          Exec ('cmd', '/c ' + ExpandConstant('{sys}\inetsrv\appcmd.exe list apppool /text:*') + ' > "' + ExpandConstant('{tmp}\ZSST_Files\iis_config\APPOOL.txt') + '"',
             ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
-          Exec ('cmd', '/c ' + ExpandConstant('{sys}\inetsrv\appcmd.exe list app /text') + ' > "' + ExpandConstant('{tmp}\ZS9ST_Files\iis_config\summary.txt') + '"',
+          Exec ('cmd', '/c ' + ExpandConstant('{sys}\inetsrv\appcmd.exe list app /text') + ' > "' + ExpandConstant('{tmp}\ZSST_Files\iis_config\summary.txt') + '"',
             ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
-          Exec ('cmd', '/c ' + ExpandConstant('{sys}\inetsrv\appcmd.exe list vdir /text') + ' >> "' + ExpandConstant('{tmp}\ZS9ST_Files\iis_config\summary.txt') + '"',
+          Exec ('cmd', '/c ' + ExpandConstant('{sys}\inetsrv\appcmd.exe list vdir /text') + ' >> "' + ExpandConstant('{tmp}\ZSST_Files\iis_config\summary.txt') + '"',
             ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
-          Exec ('cmd', '/c ' + ExpandConstant('{sys}\inetsrv\appcmd.exe list site /text') + ' >> "' + ExpandConstant('{tmp}\ZS9ST_Files\iis_config\summary.txt') + '"',
+          Exec ('cmd', '/c ' + ExpandConstant('{sys}\inetsrv\appcmd.exe list site /text') + ' >> "' + ExpandConstant('{tmp}\ZSST_Files\iis_config\summary.txt') + '"',
             ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
 
-          DirCopy (ExpandConstant('{sd}\inetpub\logs\LogFiles'), ExpandConstant('{tmp}\ZS9ST_Files\iis_logs'));
-          DirCopy (ExpandConstant('{sys}\LogFiles\HTTPERR'), ExpandConstant('{tmp}\ZS9ST_Files\iis_logs\HTTPERR'));
+          DirCopy (ExpandConstant('{sd}\inetpub\logs\LogFiles'), ExpandConstant('{tmp}\ZSST_Files\iis_logs'));
+          DirCopy (ExpandConstant('{sys}\LogFiles\HTTPERR'), ExpandConstant('{tmp}\ZSST_Files\iis_logs\HTTPERR'));
         end;
 
         ProgressPage.SetProgress(4, 10);
         ProgressPage.SetText('Getting configuration and logs - Zend Server...', '');
 
-        DirCopy (InstallPath + '\ZendServer\etc', ExpandConstant('{tmp}\ZS9ST_Files\zend_etc'));
-        DirCopy (InstallPath + '\ZendServer\gui\config', ExpandConstant('{tmp}\ZS9ST_Files\gui_config'));
+        DirCopy (InstallPath + '\ZendServer\etc', ExpandConstant('{tmp}\ZSST_Files\zend_etc'));
+        if (DirExists (InstallPath + '\ZendServer\php\7.1\etc')) then
+        begin
+          DirCopy (InstallPath + '\ZendServer\php\7.1\etc', ExpandConstant('{tmp}\ZSST_Files\php_7.1_etc'));
+        end;
+        if (DirExists (InstallPath + '\ZendServer\php\7.2\etc')) then
+        begin
+          DirCopy (InstallPath + '\ZendServer\php\7.2\etc', ExpandConstant('{tmp}\ZSST_Files\php_7.2_etc'));
+        end;
+        if (DirExists (InstallPath + '\ZendServer\php\7.3\etc')) then
+        begin
+          DirCopy (InstallPath + '\ZendServer\php\7.3\etc', ExpandConstant('{tmp}\ZSST_Files\php_7.3_etc'));
+        end;
 
+        DirCopy (InstallPath + '\ZendServer\gui\config', ExpandConstant('{tmp}\ZSST_Files\gui_config'));
+          
         if IsComponentSelected('options\full') then
         begin
-          DirCopy (InstallPath + '\ZendServer\logs', ExpandConstant('{tmp}\ZS9ST_Files\zend_logs'));
+          DirCopy (InstallPath + '\ZendServer\logs', ExpandConstant('{tmp}\ZSST_Files\zend_logs'));
         end else begin
           ProgressPage.SetText('Getting configuration and logs - Zend Server...', '');
-          Exec (InstallPath + '\ZendServer\bin\php.exe',
-            '-n "' + ExpandConstant('{tmp}\list_logs.php') + '" 1000 "' + InstallPath + '\ZendServer\logs\*.log" "' + ExpandConstant('{tmp}\ZS9ST_Files\zend_logs') + '"',
+          Exec (InstallPath + '\ZendServer\php\active\bin\php.exe',
+            '-n "' + ExpandConstant('{tmp}\list_logs.php') + '" 1000 "' + InstallPath + '\ZendServer\logs\*.log" "' + ExpandConstant('{tmp}\ZSST_Files\zend_logs') + '"',
             '', SW_HIDE, ewWaitUntilTerminated, cmdResult);
         end;
 
@@ -372,7 +390,7 @@ begin
         ProgressPage.SetText('Getting Zend Server information...', '');
         
         Exec (ExpandConstant('{tmp}\zs.cmd'),
-          '"' + InstallPath + '\ZendServer" "' + ExpandConstant('{tmp}\ZS9ST_Files') + '"',
+          '"' + InstallPath + '\ZendServer" "' + ExpandConstant('{tmp}\ZSST_Files') + '"',
           ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
 
         // get SQLite DBs
@@ -381,7 +399,7 @@ begin
           if IsSQLite then
           begin
             ProgressPage.SetText('Getting SQLite databases...', '');
-            DirCopy (InstallPath + '\ZendServer\data\db', ExpandConstant('{tmp}\ZS9ST_Files\zs_sqlite'));
+            DirCopy (InstallPath + '\ZendServer\data\db', ExpandConstant('{tmp}\ZSST_Files\zs_sqlite'));
           end else begin
             MsgBox('This server appears to be part of a cluster. Although you chose to add the SQLite databses to the archive, they will not be included.', mbInformation, MB_OK);
           end;
@@ -403,12 +421,12 @@ begin
             DBuser := GetIniString('general', 'zend.database.user', '', ExpandConstant('{tmp}\zend_database.ini'));
             DBpw := GetIniString('general', 'zend.database.password', '', ExpandConstant('{tmp}\zend_database.ini'));
 
-            CreateDir (ExpandConstant('{tmp}\ZS9ST_Files\zs_mysql'));
+            CreateDir (ExpandConstant('{tmp}\ZSST_Files\zs_mysql'));
 
-            Exec (InstallPath + '\ZendServer\bin\php.exe',
-              '-n -d "extension=''' + InstallPath + '\ZendServer\lib\phpext\php_mysqli.dll''" -f ' + ExpandConstant('{tmp}\mysql.php') + ' ' +
-              DBhost + ' ' + DBport + ' ' + DBname + ' ' + DBuser + ' "' + DBpw + '" "' + ExpandConstant('{tmp}\ZS9ST_Files\zs_mysql\mysql_info.html') + '"',
-              InstallPath + '\ZendServer\bin', SW_HIDE, ewWaitUntilTerminated, cmdResult);
+            Exec (InstallPath + '\ZendServer\php\active\bin\php.exe',
+              '-n -d "extension=''' + InstallPath + '\ZendServer\php\active\lib\ext\php_mysqli.dll''" -f ' + ExpandConstant('{tmp}\mysql.php') + ' ' +
+              DBhost + ' ' + DBport + ' ' + DBname + ' ' + DBuser + ' "' + DBpw + '" "' + ExpandConstant('{tmp}\ZSST_Files\zs_mysql\mysql_info.html') + '"',
+              InstallPath + '\ZendServer\php\active\bin', SW_HIDE, ewWaitUntilTerminated, cmdResult);
           end;
         end;
 
@@ -418,7 +436,7 @@ begin
         ProgressPage.SetText('Getting system information...', '');
         
         Exec (ExpandConstant('{tmp}\sys.cmd'),
-          '"' + InstallPath + '\ZendServer" "' + ExpandConstant('{tmp}\ZS9ST_Files') + '"',
+          '"' + InstallPath + '\ZendServer" "' + ExpandConstant('{tmp}\ZSST_Files') + '"',
           ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
 
 
@@ -439,10 +457,10 @@ begin
 
         OverviewText := OverviewText + 'Web Server: ' + WebServer;
         OverviewText := OverviewText + ',  PHP Version: ';
-        SaveStringToFile(ExpandConstant('{tmp}\ZS9ST_Files\overview.txt'), OverviewText, True);
+        SaveStringToFile(ExpandConstant('{tmp}\ZSST_Files\overview.txt'), OverviewText, True);
 
-        Exec (InstallPath + '\ZendServer\bin\php.exe',
-          '-nr "file_put_contents (\"' + ExpandConstant('{tmp}\ZS9ST_Files\overview.txt') +'\" , phpversion(), FILE_APPEND);"',
+        Exec (InstallPath + '\ZendServer\php\active\bin\php.exe',
+          '-nr "file_put_contents (\"' + ExpandConstant('{tmp}\ZSST_Files\overview.txt') +'\" , phpversion(), FILE_APPEND);"',
           ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
         
 
@@ -459,12 +477,12 @@ begin
         // GetSpaceOnDisk('C:\', True, FreeMB, TotalMB);
         // OverviewText := OverviewText + 'Space disk C: ' + IntToStr(FreeMB) + 'MB out of ' + IntToStr(TotalMB) + 'MB total' + #13#10 ;
 
-        SaveStringToFile(ExpandConstant('{tmp}\ZS9ST_Files\overview.txt'), OverviewText, True);
+        SaveStringToFile(ExpandConstant('{tmp}\ZSST_Files\overview.txt'), OverviewText, True);
 
         // License information
-        LOrder := GetIniString('Zend', 'zend.user_name', '', InstallPath + '\ZendServer\etc\php.ini');
-        LKey := GetIniString('Zend', 'zend.serial_number', '', InstallPath + '\ZendServer\etc\php.ini');
-        Exec ('cmd', '/c ' + GetShortName(InstallPath + '\ZendServer\bin\php-cgi.exe') + ' -c "' + InstallPath + '\ZendServer\etc\php.ini" -f "' + ExpandConstant('{tmp}\checLic.php') + '" o=' + LOrder + ' k=' + LKey + ' >> "' + ExpandConstant('{tmp}\ZS9ST_Files\overview.txt') + '"',
+        LOrder := GetIniString('Zend.ZendGlobalDirectives', 'zend.user_name', '', InstallPath + '\ZendServer\etc\ZendGlobalDirectives.ini');
+        LKey := GetIniString('Zend.ZendGlobalDirectives', 'zend.serial_number', '', InstallPath + '\ZendServer\etc\ZendGlobalDirectives.ini');
+        Exec ('cmd', '/c ' + GetShortName(InstallPath + '\ZendServer\php\active\bin\php-cgi.exe') + ' -c "' + InstallPath + '\ZendServer\php\active\etc\php.ini" -f "' + ExpandConstant('{tmp}\checLic.php') + '" o=' + LOrder + ' k=' + LKey + ' >> "' + ExpandConstant('{tmp}\ZSST_Files\overview.txt') + '"',
           ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
 
         // PACKING  
@@ -472,7 +490,7 @@ begin
         ProgressPage.SetProgress(9, 10);
 
         Exec (ExpandConstant('{tmp}\7z.exe'),
-          'a "' +  ArchiveName + '" "' + ExpandConstant('{tmp}\ZS9ST_Files') + '"',
+          'a "' +  ArchiveName + '" "' + ExpandConstant('{tmp}\ZSST_Files') + '"',
           ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
 
 

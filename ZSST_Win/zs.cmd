@@ -1,6 +1,5 @@
 @echo off
 
-rem ZS 7
 rem Usage: 'command.cmd "Zend Server Directory" "Support Tool Temp Directory"'
 
 echo "Getting Directory Listing..."

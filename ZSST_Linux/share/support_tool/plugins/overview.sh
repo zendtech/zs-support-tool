@@ -11,13 +11,17 @@ cat /etc/issue >> $WRITETO
 echo >> $WRITETO
 lsb_release -a >> $WRITETO
 echo >> $WRITETO
+cat /etc/redhat-release >> $WRITETO
+echo >> $WRITETO
+cat /etc/os-release >> $WRITETO
+echo >> $WRITETO
 echo "Web Server: $WEB_SRV" >> $WRITETO
 echo >> $WRITETO
 $ZCE_PREFIX/bin/php -v >> $WRITETO
 echo >> $WRITETO
 
-OrderNr=$(grep 'zend.user_name' $ZCE_PREFIX/etc/conf.d/ZendGlobalDirectives.ini | cut -d'=' -f2 | tr -d '[:space:]')
-LicenseKey=$(grep 'zend.serial_number' $ZCE_PREFIX/etc/conf.d/ZendGlobalDirectives.ini | cut -d'=' -f2 | tr -d '[:space:]')
+OrderNr=$(grep 'zend.user_name' $ZCE_PREFIX/etc/ZendGlobalDirectives.ini | cut -d'=' -f2 | tr -d '[:space:]')
+LicenseKey=$(grep 'zend.serial_number' $ZCE_PREFIX/etc/ZendGlobalDirectives.ini | cut -d'=' -f2 | tr -d '[:space:]')
 
 cat <<EOST > /tmp/checLic.php
 <?php
@@ -51,7 +55,7 @@ if (\$a['license_ok']) {
 }
 EOST
 
-/usr/local/zend/bin/php -f /tmp/checLic.php >> $WRITETO
+$ZCE_PREFIX/bin/php -f /tmp/checLic.php >> $WRITETO
 rm -f /tmp/checLic.php
 
 # These work on Debian only, need universal replacement

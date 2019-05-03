@@ -35,18 +35,8 @@ for option in "$@"; do
 			echo "Collecting all internal SQLITE databases enabled"
 			;;
 
-		"--clean-monitor")
-			export ZSST_ACTION="clean_monitor.sh"
-			break
-			;;
-
 		"--clean-alerts")
 			export ZSST_ACTION="clean_notifications.sh"
-			break
-			;;
-
-		"--chuser")
-			export ZSST_ACTION="ch_apache_user.sh"
 			break
 			;;
 

@@ -15,7 +15,7 @@ function installLatest
 	cd $ZCE_PREFIX/tmp/STlatest || exit 1
 
 	ZEND_ERROR_LOG=/dev/null
-	downloadtofile "https://github.com/zendtech/zs-support-tool/releases/latest/download/SupportTool_LinuxSFX.tar.gz" ZSST_latest.tgz
+	downloadtofile "https://github.com/zendtech/zs-support-tool/releases/latest/download/SupportToolMulti_LinuxSFX.tar.gz" ZSST_latest.tgz
 
 	tar xf ZSST_latest.tgz
 	./SupportToolSFX.bin

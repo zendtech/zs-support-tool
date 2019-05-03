@@ -14,7 +14,7 @@ fi
 # Users start
 zenduser=$(id -a zend)
 apacheuser=$(id -a ${WEB_USER})
-gduser=$(grep "zend.httpd_" $ZCE_PREFIX/etc/conf.d/ZendGlobalDirectives.ini)
+gduser=$(grep "zend.httpd_" $ZCE_PREFIX/etc/ZendGlobalDirectives.ini)
 
 cat > $ZEND_DATA_TMPDIR/zs_users.txt <<EOUSERS
 

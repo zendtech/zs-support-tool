@@ -17,7 +17,7 @@ fi
 # Users start
 zenduser=$(id -a zend)
 apacheuser=$(id -a ${WEB_USER})
-gduser=$(grep "zend.httpd_" $ZCE_PREFIX/etc/conf.d/ZendGlobalDirectives.ini)
+gduser=$(grep "zend.httpd_" $ZCE_PREFIX/etc/ZendGlobalDirectives.ini)
 
 cat > $ZEND_DATA_TMPDIR/zs_users.txt <<EOUSERS
 
@@ -113,12 +113,16 @@ cp -R $ZCE_PREFIX/etc $ZEND_DATA_TMPDIR/zend_etc
 cp -R $ZCE_PREFIX/gui/lighttpd/etc $ZEND_DATA_TMPDIR/lighttpd_etc
 cp -R $ZCE_PREFIX/gui/config $ZEND_DATA_TMPDIR/gui_config
 
+mkdir $ZEND_DATA_TMPDIR/php_config
+tar cf - $ZCE_PREFIX/php/7.*/etc | tar -C $ZEND_DATA_TMPDIR/php_config xf -
 
 if [ "$WEB_SRV" = "apache" ]; then
 	# Apache configuration
 	if [ -d /etc/httpd ]; then
 		# Workaroung for RHEL placing logs inside etc
-		rsync -rL --exclude=logs /etc/httpd/ $ZEND_DATA_TMPDIR/apache_config
+		# rsync -rL --exclude=logs /etc/httpd/ $ZEND_DATA_TMPDIR/apache_config
+		mkdir $ZEND_DATA_TMPDIR/apache_config
+		tar --exclude='logs' --exclude='modules' cf - /etc/httpd | tar -C $ZEND_DATA_TMPDIR/apache_config xf -
 	elif [ -d /etc/apache ]; then
 		cp -RL /etc/apache $ZEND_DATA_TMPDIR/apache_config
 	elif [ -d /etc/apache2 ]; then
