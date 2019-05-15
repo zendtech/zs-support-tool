@@ -48,6 +48,6 @@ cp -R $ZCE_PREFIX/gui/config $ZEND_DATA_TMPDIR/gui_config
 mkdir -p $ZEND_DATA_TMPDIR/php_config/7.1
 mkdir $ZEND_DATA_TMPDIR/php_config/7.2
 mkdir $ZEND_DATA_TMPDIR/php_config/7.3
-cp -R $ZCE_PREFIX/php/7.2/etc $ZEND_DATA_TMPDIR/php_config/7.1
+cp -R $ZCE_PREFIX/php/7.1/etc $ZEND_DATA_TMPDIR/php_config/7.1
 cp -R $ZCE_PREFIX/php/7.2/etc $ZEND_DATA_TMPDIR/php_config/7.2
 cp -R $ZCE_PREFIX/php/7.3/etc $ZEND_DATA_TMPDIR/php_config/7.3
