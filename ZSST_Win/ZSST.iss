@@ -21,20 +21,21 @@ WizardSmallImageFile=ZSxST.bmp
 [Languages]
 Name: "en"; MessagesFile: "ZSxST.isl"
 
-
 [Files]
 Source: "7z.exe"; Flags: dontcopy
 Source: "7z.dll"; Flags: dontcopy
 Source: "zs.cmd"; Flags: dontcopy
 Source: "sys.cmd"; Flags: dontcopy
+
 Source: "curl.exe"; Flags: dontcopy
 Source: "libssh2.dll"; Flags: dontcopy
 Source: "libeay32.dll"; Flags: dontcopy
 Source: "ssleay32.dll"; Flags: dontcopy
+
 Source: "list_logs.php"; Flags: dontcopy
 Source: "mysql.php"; Flags: dontcopy
 Source: "checLic.php"; Flags: dontcopy
-
+Source: "info.php"; Flags: dontcopy
 
 [Types]
 Name: "min"; Description: "Basic"
@@ -314,8 +315,7 @@ begin
           ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
         
         Exec (InstallPath + '\ZendServer\php\active\bin\php.exe',
-          '-nr "$info=json_decode(file_get_contents(\"phpinfo_main.html\"), true); file_put_contents(\"real_phpinfo_main.html\",$info[\"phpinfo\"]);"',
-          ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
+          '-n "' + ExpandConstant('{tmp}\info.php') + '" "' + ExpandConstant('{tmp}') + '"','', SW_HIDE, ewWaitUntilTerminated, cmdResult);
 
         RenameFile (ExpandConstant('{tmp}\real_phpinfo_main.html'), ExpandConstant('{tmp}\ZSST_Files\phpinfo.html'));
         
@@ -460,8 +460,8 @@ begin
         SaveStringToFile(ExpandConstant('{tmp}\ZSST_Files\overview.txt'), OverviewText, True);
 
         Exec (InstallPath + '\ZendServer\php\active\bin\php.exe',
-          '-nr "file_put_contents (\"' + ExpandConstant('{tmp}\ZSST_Files\overview.txt') +'\" , phpversion(), FILE_APPEND);"',
-          ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
+          '-r "file_put_contents (\"' + ExpandConstant('{tmp}\ZSST_Files\overview.txt') +'\" , phpversion(), FILE_APPEND);"',
+         InstallPath + '\ZendServer\php\active\bin', SW_HIDE, ewWaitUntilTerminated, cmdResult);
         
 
         OverviewText := #13#10#13#10 ;
@@ -483,7 +483,7 @@ begin
         LOrder := GetIniString('Zend.ZendGlobalDirectives', 'zend.user_name', '', InstallPath + '\ZendServer\etc\ZendGlobalDirectives.ini');
         LKey := GetIniString('Zend.ZendGlobalDirectives', 'zend.serial_number', '', InstallPath + '\ZendServer\etc\ZendGlobalDirectives.ini');
         Exec ('cmd', '/c ' + GetShortName(InstallPath + '\ZendServer\php\active\bin\php-cgi.exe') + ' -c "' + InstallPath + '\ZendServer\php\active\etc\php.ini" -f "' + ExpandConstant('{tmp}\checLic.php') + '" o=' + LOrder + ' k=' + LKey + ' >> "' + ExpandConstant('{tmp}\ZSST_Files\overview.txt') + '"',
-          ExpandConstant('{tmp}'), SW_HIDE, ewWaitUntilTerminated, cmdResult);
+          InstallPath + '\ZendServer\php\active\bin', SW_HIDE, ewWaitUntilTerminated, cmdResult);
 
         // PACKING  
         ProgressPage.SetText('Creating archive...', '');
