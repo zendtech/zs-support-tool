@@ -56,18 +56,18 @@ if [ "$1" = "prepare" ]; then
 	PHP_VER=`/usr/local/zend/bin/php -nr "echo PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;"`
 	WEB_SRV=$(grep "zend.webserver_type" /usr/local/zend/etc/ZendGlobalDirectives.ini | cut -d'=' -f2 | tr -d '[:space:]')
 
-	# not including 'php-$PHP_VER-fcgi-zend-server-dbg' because it seems to cause bogus conflict in YUM
-	DBG_COMMON="gdb lsof strace zend-server-php-$PHP_VER-dbg php-$PHP_VER-bin-zend-server-dbg"
+	# not including 'php-fcgi-zend-server-dbg' because it seems to cause bogus conflict in YUM
+	DBG_COMMON="gdb lsof strace zend-server-php-dbg php-bin-zend-server-dbg"
 
 	APTcmd=apt-get
 	if command -v $APTcmd 2> /dev/null; then
 		REPOFILE="/etc/apt/sources.list.d/zend.list"
 		otherrepo $REPOFILE $RELEASE
-		DBG_PHP_BIN="php-$PHP_VER-fpm-zend-server-dbg"
+		DBG_PHP_BIN="php-fpm-zend-server-dbg"
 		if [ "$WEB_SRV" = "apache" ]; then
 			SAPI=$(grep -E '^\s*zend.php_sapi\s*=' /usr/local/zend/etc/ZendGlobalDirectives.ini | sed 's@ @@g' | cut -d '=' -f 2)
 			if [ "$SAPI" != "fpm" ]; then
-				DBG_PHP_BIN="libapache2-mod-php-$PHP_VER-zend-server-dbg"
+				DBG_PHP_BIN="libapache2-mod-php-zend-server-dbg"
 			fi
 		fi
 		$APTcmd update
@@ -76,11 +76,11 @@ if [ "$1" = "prepare" ]; then
 	elif command -v yum 2> /dev/null; then
 		REPOFILE="/etc/yum.repos.d/zend.repo"
 		otherrepo $REPOFILE $RELEASE
-		DBG_PHP_BIN="php-$PHP_VER-fpm-zend-server-dbg"
+		DBG_PHP_BIN="php-fpm-zend-server-dbg"
 		if [ "$WEB_SRV" = "apache" ]; then
 			SAPI=$(grep -E '^\s*zend.php_sapi' /usr/local/zend/etc/ZendGlobalDirectives.ini | sed 's@ @@g' | cut -d '=' -f 2)
 			if [ "$SAPI" != "fpm" ]; then
-				DBG_PHP_BIN="mod-php-$PHP_VER-apache2-zend-server-dbg"
+				DBG_PHP_BIN="mod-php-apache2-zend-server-dbg"
 			fi
 		fi
 		yum clean all
