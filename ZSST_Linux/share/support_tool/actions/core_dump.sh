@@ -108,7 +108,7 @@ cp $ZCE_PREFIX/share/support_tool/gdb_adv.sh $ZCE_PREFIX/var/core
 chmod a+x $ZCE_PREFIX/var/core/gdb_adv.sh
 
 # not including 'php-$PHP_VER-fcgi-zend-server-dbg' because it seems to cause bogus conflict in YUM
-DBG_COMMON="gdb zend-server-php-dbg php-bin-zend-server-dbg"
+DBG_COMMON="gdb zend-server-dbg php-bin-zend-server-dbg"
 
 if command -v apt-get 2> /dev/null; then
 	REPOFILE="/etc/apt/sources.list.d/zend.list"
