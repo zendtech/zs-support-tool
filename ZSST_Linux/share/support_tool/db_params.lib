@@ -9,5 +9,5 @@ if [ "$dbtype" == "MYSQL" ]; then
 	dbpw=$(grep -E '^\s*zend.database.password' $ZCE_PREFIX/etc/zend_database.ini | sed 's@ @@g' | cut -d '=' -f 2  | sed 's@^"@@' | sed 's@"$@@')
 
 	MYSQL_EXEC="mysql -h$dbhost -P$dbport -u$dbuser -p$dbpw $dbname -e"
-	MYSQL_PHP="$ZCE_PREFIX/bin/php -nd extension='$ZCE_PREFIX/lib/php_extensions/mysqli.so' -f $ZCE_PREFIX/share/support_tool/mysql.php $dbhost $dbport $dbname $dbuser $dbpw"
+	MYSQL_PHP="$ZCE_PREFIX/bin/php -nd extension='$ZCE_PREFIX/php/active/lib/ext/mysqli.so' -f $ZCE_PREFIX/share/support_tool/mysql.php $dbhost $dbport $dbname $dbuser $dbpw"
 fi
