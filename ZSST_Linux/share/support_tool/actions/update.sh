@@ -14,7 +14,6 @@ function installLatest
 	mkdir $ZCE_PREFIX/tmp/STlatest
 	cd $ZCE_PREFIX/tmp/STlatest || exit 1
 
-	ZEND_ERROR_LOG=/dev/null
 	downloadtofile "https://github.com/zendtech/zs-support-tool/releases/latest/download/SupportToolMulti_LinuxSFX.tar.gz" ZSST_latest.tgz
 
 	tar xf ZSST_latest.tgz
@@ -24,8 +23,11 @@ function installLatest
 }
 
 cd $ZCE_PREFIX/tmp || exit 1
-downloadtofile "https://api.github.com/repos/zendtech/zs-support-tool/releases/latest" online_ver.json
-latestBuild=$(php -n -r '$a=file_get_contents("online_ver.json"); $b=json_decode($a,true); echo $b["name"];')
+if ! downloadtofile "https://api.github.com/repos/zendtech/zs-support-tool/releases/latest" online_ver.json; then 
+	echo -e "\n\nConnection to GitHub failed. You may find a more detailed error report above.\n"
+	exit 1
+fi
+latestBuild=$($ZCE_PREFIX/bin/php -n -r '$a=file_get_contents("online_ver.json"); $b=json_decode($a,true); echo $b["name"];')
 rm -f online_ver.json
 currentBuild=$($ZCE_PREFIX/bin/support_tool.sh -v | sed "s@^.*build @@")
 
@@ -33,8 +35,8 @@ echo
 if [ "$currentBuild" = "$latestBuild" ]; then
 	echo "There is no newer build available. Current build is   $currentBuild."
 else
-	echo "Current build:  $currentBuild"
-	echo "Latest build:   $latestBuild"
+	echo "Installed build:  $currentBuild"
+	echo "On-Line build:   $latestBuild"
 fi
 echo
 

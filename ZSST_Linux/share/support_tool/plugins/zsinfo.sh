@@ -109,12 +109,13 @@ find $ZCE_PREFIX/lib -type f -exec md5sum {} \; >> $ZEND_DATA_TMPDIR/zs_md5.txt
 ls -RAlF $ZCE_PREFIX/ > $ZEND_DATA_TMPDIR/zs_dir.txt
 
 cp /etc/zce.rc $ZEND_DATA_TMPDIR/zs_rc.txt
+cp /etc/zce.env $ZEND_DATA_TMPDIR/zs_env.txt
 cp -R $ZCE_PREFIX/etc $ZEND_DATA_TMPDIR/zend_etc
 cp -R $ZCE_PREFIX/gui/lighttpd/etc $ZEND_DATA_TMPDIR/lighttpd_etc
 cp -R $ZCE_PREFIX/gui/config $ZEND_DATA_TMPDIR/gui_config
 
 mkdir $ZEND_DATA_TMPDIR/php_config
-tar cf - $ZCE_PREFIX/php/7.*/etc | tar --strip-components=4 -C $ZEND_DATA_TMPDIR/php_config -xf -
+tar -cf - $ZCE_PREFIX/php/7.*/etc | tar --strip-components=4 -C $ZEND_DATA_TMPDIR/php_config -xf -
 
 if [ "$WEB_SRV" = "apache" ]; then
 	# Apache configuration
@@ -122,7 +123,7 @@ if [ "$WEB_SRV" = "apache" ]; then
 		# Workaroung for RHEL placing logs inside etc
 		# rsync -rL --exclude=logs /etc/httpd/ $ZEND_DATA_TMPDIR/apache_config
 		mkdir $ZEND_DATA_TMPDIR/apache_config
-		tar --exclude='logs' --exclude='modules' cf - /etc/httpd | tar -C $ZEND_DATA_TMPDIR/apache_config -xf -
+		tar --exclude='logs' --exclude='modules' -cf - /etc/httpd | tar --strip-components=2 -C $ZEND_DATA_TMPDIR/apache_config -xf -
 	elif [ -d /etc/apache ]; then
 		cp -RL /etc/apache $ZEND_DATA_TMPDIR/apache_config
 	elif [ -d /etc/apache2 ]; then

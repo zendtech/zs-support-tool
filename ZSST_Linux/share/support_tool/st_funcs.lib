@@ -2,6 +2,7 @@
 function logerror
 {
 	if [ $? -ne 0 ];then 
+		if [ ! -w ${ZEND_ERROR_LOG} ]; then ZEND_ERROR_LOG=/dev/stdout; fi
 		echo "$ZSST_PLUGIN_NAME: $1 executed, return code was not 0." >> ${ZEND_ERROR_LOG}
 	fi
 }
@@ -10,23 +11,42 @@ function logerror
 # downloadtofile "URL" "outpit file"
 function downloadtofile
 {
-
 if command -v wget > /dev/null 2>&1 ;then
-	wget -O $2 $1 2>/dev/null
-	logerror "wget $1"
+	if wget -q --spider "$1"; then
+		wget -O $2 $1 2>/dev/null
+		logerror "wget $1"
+	else
+		# output for troubleshooting
+		wget -nv --spider "$1"
+		return 21
+	fi
 
 elif command -v aria2c > /dev/null 2>&1 ;then
-	aria2c -j 1 -s 1 -o $2 $1 > /dev/null
-	logerror "aria2c $1"
+	if aria2c -q --dry-run "$1"; then
+		aria2c -j 1 -s 1 -o $2 $1 > /dev/null
+		logerror "aria2c $1"
+	else
+		# output for troubleshooting
+		aria2c -q -l - --log-level=warn --dry-run "$1"
+		return 22
+	fi
 
 elif command -v curl > /dev/null 2>&1 ;then
-	curl -sLo $2 $1
-	logerror "curl $1"
+	if curl -fsLIo /dev/null "$1"; then
+		curl -sLo $2 $1
+		logerror "curl $1"
+	else
+		# output for troubleshooting
+		curl -LI "$1"
+		return 23
+	fi
 
 else
+	if [ ! -w ${ZEND_ERROR_LOG} ]; then ZEND_ERROR_LOG=/dev/stdout; fi
 	echo "wget, aria2c or curl not found." >> ${ZEND_ERROR_LOG}
-
+	return 1
 fi
+return 0
 }
 
 
