@@ -1,51 +1,52 @@
-
+# logerror "message" "/detailed/log/file"
 function logerror
 {
-	if [ $? -ne 0 ];then 
-		if [ ! -w ${ZEND_ERROR_LOG} ]; then ZEND_ERROR_LOG=/dev/stdout; fi
-		echo "$ZSST_PLUGIN_NAME: $1 executed, return code was not 0." >> ${ZEND_ERROR_LOG}
+	# the point of this part is logging to STDOUT in actions
+	if [ -z ${ZEND_ERROR_LOG} ]; then
+		ZEND_ERROR_LOG=/dev/stdout
+	elif [ ! -w ${ZEND_ERROR_LOG} ]; then
+		ZEND_ERROR_LOG=/dev/stdout
 	fi
+
+	echo "$ZSST_PLUGIN_NAME: $1" >> ${ZEND_ERROR_LOG}
+	if [ -r "$2" ]; then
+		echo "------------- More Details -----------------------" >> ${ZEND_ERROR_LOG}
+		cat "$2"  >> ${ZEND_ERROR_LOG}
+		echo "--------------------------------------------------" >> ${ZEND_ERROR_LOG}
+		rm -f "$2"
+	fi
+
 }
 
 
-# downloadtofile "URL" "outpit file"
+# downloadtofile "URL" "output file"
 function downloadtofile
 {
-if command -v wget > /dev/null 2>&1 ;then
-	if wget -q --spider "$1"; then
-		wget -O $2 $1 2>/dev/null
-		logerror "wget $1"
-	else
-		# output for troubleshooting
-		wget -nv --spider "$1"
+DL_LOG=/tmp/d0wnl0ad2F1L3.log
+
+if command -v wget &> /dev/null ;then
+	if ! wget -O $2 "$1" &> $DL_LOG ; then
+		logerror "'wget $1'  FAILED" $DL_LOG
 		return 21
 	fi
 
-elif command -v aria2c > /dev/null 2>&1 ;then
-	if aria2c -q --dry-run "$1"; then
-		aria2c -j 1 -s 1 -o $2 $1 > /dev/null
-		logerror "aria2c $1"
-	else
-		# output for troubleshooting
-		aria2c -q -l - --log-level=warn --dry-run "$1"
+elif command -v aria2c &> /dev/null ;then
+	if ! aria2c -j 1 -s 1 -o $2 "$1" &> $DL_LOG ; then
+		logerror "'aria2c $1'  FAILED" $DL_LOG
 		return 22
 	fi
 
-elif command -v curl > /dev/null 2>&1 ;then
-	if curl -fsLIo /dev/null "$1"; then
-		curl -sLo $2 $1
-		logerror "curl $1"
-	else
-		# output for troubleshooting
-		curl -LI "$1"
+elif command -v curl &> /dev/null ;then
+	if ! curl -Lo $2 "$1" &> $DL_LOG ; then
+		logerror "'curl $1'  FAILED" $DL_LOG
 		return 23
 	fi
 
 else
-	if [ ! -w ${ZEND_ERROR_LOG} ]; then ZEND_ERROR_LOG=/dev/stdout; fi
-	echo "wget, aria2c or curl not found." >> ${ZEND_ERROR_LOG}
+	logerror "wget, aria2c or curl not found."
 	return 1
 fi
+rm -f $DL_LOG
 return 0
 }
 

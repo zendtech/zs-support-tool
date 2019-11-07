@@ -24,18 +24,18 @@ function otherrepo
 	revert="otherrepo $1 revertBAK"
 }
 
-# downloadtofile "URL" "outpit file"
+# downloadtofile "URL" "output file"
 function downloadtofile
 {
 
-if command -v wget > /dev/null 2>&1 ;then
-	wget -O $2 $1 2>/dev/null
+if command -v wget &> /dev/null 2>&1 ;then
+	wget -O $2 $1
 
-elif command -v aria2c > /dev/null 2>&1 ;then
-	aria2c -j 1 -s 1 -o $2 $1 > /dev/null
+elif command -v aria2c &> /dev/null 2>&1 ;then
+	aria2c -j 1 -s 1 -o $2 $1
 
-elif command -v curl > /dev/null 2>&1 ;then
-	curl -sLo $2 $1
+elif command -v curl &> /dev/null 2>&1 ;then
+	curl -Lo $2 $1
 
 else
 	echo "wget, aria2c or curl not found."

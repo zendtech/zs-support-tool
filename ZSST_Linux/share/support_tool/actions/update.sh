@@ -14,7 +14,11 @@ function installLatest
 	mkdir $ZCE_PREFIX/tmp/STlatest
 	cd $ZCE_PREFIX/tmp/STlatest || exit 1
 
-	downloadtofile "https://github.com/zendtech/zs-support-tool/releases/latest/download/SupportToolMulti_LinuxSFX.tar.gz" ZSST_latest.tgz
+	if ! downloadtofile "https://github.com/zendtech/zs-support-tool/releases/latest/download/SupportToolMulti_LinuxSFX.tar.gz" ZSST_latest.tgz; then 
+		echo -e "\n\nDownload from GitHub failed. You may find a more detailed error report above.\n"
+		rm -rf "$ZCE_PREFIX/tmp/STlatest"
+		exit 1
+	fi
 
 	tar xf ZSST_latest.tgz
 	./SupportToolSFX.bin
