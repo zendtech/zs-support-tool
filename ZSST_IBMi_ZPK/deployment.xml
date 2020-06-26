@@ -2,9 +2,9 @@
 <package xmlns="http://www.zend.com/server/deployment-descriptor/1.0" version="1.0">
     <name>Support Tool App (IBM i)</name>
     <summary>Deployable Zend Server (IBM i) Support Tool</summary>
-    <description>Zend Server Support Tool which can be deployed from a ZPK and run as a web application. Of course, it's still a shell on the inside.</description>
+    <description>Zend Server Support Tool which can be deployed from a ZPK and run as a web application. Of course, it's still a shell script on the inside.</description>
     <version>
-        <release>2019.0._TS_</release>
+        <release>Multi._TS_</release>
     </version>
     <icon>ZSST_icon.png</icon>
     <eula>read.txt</eula>

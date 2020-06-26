@@ -7,7 +7,7 @@ if (isSet($_POST['runme'])) {
     
     echo "$WEB_PATH - web\n $ZS_PATH - zs\n $APP_PATH - app\n" . __DIR__ . "\n\n";
 
-    $a = shell_exec("ksh $APP_PATH/bin/support_tool.sh $ZS_PATH $WEB_PATH 2>&1");
+    $a = shell_exec("ksh $APP_PATH/bin/runner.sh $ZS_PATH $WEB_PATH >> $APP_PATH/docroot/status.php 2>&1");
     echo $a;
     die();
 } else if (isSet($_POST['stlist'])) {
