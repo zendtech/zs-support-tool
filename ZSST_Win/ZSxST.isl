@@ -323,7 +323,7 @@ ShutdownBlockReasonUninstallingApp=Uninstalling %1.
 
 [CustomMessages]
 
-NameAndVersion=%1 version %2
+NameAndVersion=%1
 AdditionalIcons=Additional icons:
 CreateDesktopIcon=Create a &desktop icon
 CreateQuickLaunchIcon=Create a &Quick Launch icon

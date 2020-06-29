@@ -1,12 +1,12 @@
 
 [Setup]
 SetupIconFile=zsst.ico
-AppName=Zend Server 2019.0 Support Tool
-VersionInfoVersion=2019.0.0.0
-VersionInfoDescription=Zend Server 2019.0 Support Tool (Eight)
-AppVersion=2019.0
-AppPublisher=Rogue Wave Software, Ltd.
-AppPublisherURL=http://support.roguewave.com
+AppName=Zend Server 2020.0 Support Tool
+VersionInfoVersion=2020.0.0.0
+VersionInfoDescription=Zend Server 2020.0 Support Tool (Eight)
+AppVersion=2020.0
+AppPublisher=Perforce Software
+AppPublisherURL=https://techsupport.roguewave.com
 DefaultDirName={tmp}\ZSST
 DisableProgramGroupPage=yes
 Uninstallable=no
@@ -16,6 +16,7 @@ DisableReadyPage=yes
 DisableFinishedPage=yes
 ShowLanguageDialog=no
 WizardSmallImageFile=ZSxST.bmp
+PrivilegesRequired=admin
 
 
 [Languages]
@@ -370,6 +371,10 @@ begin
         if (DirExists (InstallPath + '\ZendServer\php\7.3\etc')) then
         begin
           DirCopy (InstallPath + '\ZendServer\php\7.3\etc', ExpandConstant('{tmp}\ZSST_Files\php_7.3_etc'));
+        end;
+        if (DirExists (InstallPath + '\ZendServer\php\7.4\etc')) then
+        begin
+          DirCopy (InstallPath + '\ZendServer\php\7.4\etc', ExpandConstant('{tmp}\ZSST_Files\php_7.4_etc'));
         end;
 
         DirCopy (InstallPath + '\ZendServer\gui\config', ExpandConstant('{tmp}\ZSST_Files\gui_config'));
